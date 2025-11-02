@@ -64,7 +64,7 @@ async function callLLM(userPrompt: string, maxLength: number) {
     return new Response(JSON.stringify({ error: message, status }), { status: 502 });
   }
 
-  const data = await r.json();
+  const data = await r.json() as any;
   const text = data.choices?.[0]?.message?.content?.trim();
   if (!text) {
     return new Response(JSON.stringify({ error: 'Empty response from AI' }), { status: 502 });
@@ -90,7 +90,7 @@ export default async function handler(req: Request): Promise<Response> {
   }
 
   try {
-    const { noteContent, settings }: { noteContent: string; settings?: AIPromptSettings } = await req.json();
+    const { noteContent, settings } = await req.json() as { noteContent: string; settings?: AIPromptSettings };
 
     // Input validation (mirrors your client-side checks)
     if (!noteContent || !noteContent.trim()) {
