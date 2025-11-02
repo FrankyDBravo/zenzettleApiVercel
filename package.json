@@ -12,6 +12,9 @@
     "edge",
     "ai"
   ],
+  "engines": {
+    "node": "18.x"
+  },
   "author": "",
   "license": "ISC",
   "devDependencies": {
