@@ -1,10 +1,21 @@
 export const config = { runtime: 'edge' }; // Edge runtime is fast; remove if you prefer Node
 
+import { Ratelimit } from '@upstash/ratelimit';
+import { Redis } from '@upstash/redis';
+
 type AIPromptSettings = {
   template: string;
   includeTermExplanations?: boolean;
   maxLength?: number;
 };
+
+// Initialize rate limiter (10 requests per minute)
+const ratelimit = new Ratelimit({
+  redis: Redis.fromEnv(),
+  limiter: Ratelimit.slidingWindow(10, '1 m'),
+  analytics: true,
+  prefix: '@upstash/ratelimit',
+});
 
 const DEFAULT_AI_PROMPT = `Transform the following brief note into a comprehensive educational permanent note:\n\n{noteContent}`;
 
@@ -87,6 +98,29 @@ async function callLLM(userPrompt: string, maxLength: number) {
 export default async function handler(req: Request): Promise<Response> {
   if (req.method !== 'POST') {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405 });
+  }
+
+  // Rate limiting check
+  const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'anonymous';
+  const { success, limit, reset, remaining } = await ratelimit.limit(ip);
+  
+  if (!success) {
+    return new Response(
+      JSON.stringify({ 
+        error: 'Rate limit exceeded. Please try again later.',
+        limit,
+        remaining,
+        reset: new Date(reset).toISOString()
+      }), 
+      { 
+        status: 429,
+        headers: {
+          'X-RateLimit-Limit': limit.toString(),
+          'X-RateLimit-Remaining': remaining.toString(),
+          'X-RateLimit-Reset': reset.toString(),
+        }
+      }
+    );
   }
 
   try {

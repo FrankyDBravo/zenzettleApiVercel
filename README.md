@@ -25,10 +25,17 @@ A minimal Vercel serverless function that transforms brief notes into comprehens
    ```bash
    cp .env.example .env
    ```
-   Then edit `.env` and add your OpenAI API key:
+   Then edit `.env` and add your keys:
    ```
    OPENAI_API_KEY=sk-...
+   UPSTASH_REDIS_REST_URL=https://your-redis-url.upstash.io
+   UPSTASH_REDIS_REST_TOKEN=your-token-here
    ```
+   
+   **Get Upstash Redis credentials:**
+   - Sign up at [Upstash](https://console.upstash.com/)
+   - Create a new Redis database
+   - Copy the REST URL and REST TOKEN from the dashboard
 
 3. **Run locally:**
    ```bash
@@ -51,6 +58,8 @@ A minimal Vercel serverless function that transforms brief notes into comprehens
 3. **Set environment variables on Vercel:**
    ```bash
    vercel env add OPENAI_API_KEY
+   vercel env add UPSTASH_REDIS_REST_URL
+   vercel env add UPSTASH_REDIS_REST_TOKEN
    ```
 
 ## API Usage
@@ -82,7 +91,15 @@ A minimal Vercel serverless function that transforms brief notes into comprehens
 
 - ✅ Edge runtime for fast cold starts
 - ✅ TypeScript support
+- ✅ Rate limiting (10 requests per minute per IP)
 - ✅ Input validation (max 10,000 characters)
 - ✅ Comprehensive error handling
 - ✅ OpenAI GPT-4o-mini integration
+
+## Rate Limiting
+
+The API implements rate limiting of **10 requests per minute per IP address** using Upstash Redis. When rate limited, you'll receive a `429` response with headers indicating:
+- `X-RateLimit-Limit`: Maximum requests allowed
+- `X-RateLimit-Remaining`: Requests remaining in current window
+- `X-RateLimit-Reset`: Unix timestamp when the limit resets
 
