@@ -1,0 +1,23 @@
+{
+  "name": "vercel-parse-note",
+  "version": "1.0.0",
+  "description": "Vercel serverless function for parsing notes with AI",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "tsc"
+  },
+  "keywords": [
+    "vercel",
+    "serverless",
+    "edge",
+    "ai"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.0"
+  }
+}
+
